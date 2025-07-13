@@ -1,0 +1,46 @@
+[project]
+name = "deepsearch"
+version = "0.1.0"
+description = "This application transforms your local file system into an intelligent, searchable database. It's a powerful alternative to traditional desktop search, enabling you to interact with your documents using natural language"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "llama-index>=0.12.48",
+    "openpyxl>=3.1.5",
+    "pydantic>=2.11.7",
+    "pypdf2>=3.0.1",
+    "python-docx>=1.2.0",
+    "python-magic>=0.4.27",
+    "python-pptx>=1.0.2",
+    "watchdog>=6.0.0",
+    "whoosh>=2.7.4",
+]
+
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+    "coverage>=7.9.2",
+    "ipykernel>=6.29.5",
+    "jupyter>=1.1.1",
+    "mypy>=1.16.1",
+    "pre-commit>=4.2.0",
+    "pytest>=8.4.1",
+    "rich>=14.0.0",
+    "ruff>=0.12.3",
+    "typer>=0.16.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 88
+target-version = ['py312']
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
