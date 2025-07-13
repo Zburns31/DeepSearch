@@ -1,6 +1,12 @@
 # DeepSearch - Intelligent File System Indexing
 
-DeepSearch transforms your local file system into an intelligent, searchable database. It's a powerful alternative to traditional desktop search, enabling you to interact with your documents using natural language queries.
+This project is a high-performance desktop search tool, similar to macOS Spotlight, built to provide an intelligent search layer for your local files. It works by:
+
+- Indexing Locally: Creates a comprehensive index of your documents, PDFs, and text files.
+
+- AI-Powered Queries: Connects to local LLMs with Ollama or remote APIs (OpenAI, etc.) to allow natural language conversations with your data.
+
+- Finding Anything: Go beyond simple keyword matching. Ask questions, find concepts, and get exact answers from the contents of your files.
 
 ## Features
 
@@ -25,17 +31,17 @@ deepsearch/
 │       ├── __init__.py
 │       ├── indexing/
 │       │   ├── __init__.py
-│       │   ├── config.py              # Configuration management
-│       │   ├── extraction_standalone.py # Standalone extraction utilities
-│       │   ├── extractor.py           # Text extraction from various file types
-│       │   ├── indexer.py             # Whoosh search index management
-│       │   ├── logger.py              # Module-specific logging with factory functions
-│       │   ├── manager.py             # Main coordinator (SmartFileIndexer)
-│       │   ├── models.py              # Data models (FileMetadata, IndexingJob, etc.)
-│       │   └── watcher.py             # File system monitoring with watchdog
-│       ├── ai/                        # AI integration components
-│       ├── search/                    # Search interface components
-│       ├── ui/                        # User interface components
+│       │   ├── config.py                  # Configuration management
+│       │   ├── extraction_standalone.py   # Standalone extraction utilities
+│       │   ├── extractor.py               # Text extraction from various file types
+│       │   ├── indexer.py                 # Whoosh search index management
+│       │   ├── logger.py                  # Module-specific logging with factory functions
+│       │   ├── manager.py                 # Main coordinator (SmartFileIndexer)
+│       │   ├── models.py                  # Data models (FileMetadata, IndexingJob, etc.)
+│       │   └── watcher.py                 # File system monitoring with watchdog
+│       ├── ai/                            # AI integration components
+│       ├── search/                        # Search interface components
+│       ├── ui/                            # User interface components
 │       └── utils/
 │           ├── __init__.py
 │           └── file_utils.py          # File utility functions
