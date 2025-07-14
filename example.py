@@ -18,85 +18,98 @@ async def main():
 
     # Create configuration
     config = IndexingConfig(
-        # Customize these paths for your system
+        # Where to store the Whoosh index (will expand ~ and ENV vars)
+        index_dir=str(Path.home() / ".deepsearch_index"),
+        # Folders to monitor for changes
         monitored_paths=[
-            str(Path.home() / "Documents"),
+            str(Path("/Users/zacburns/Documents/Undergrad Notes/")),
+            # str(Path.home() / "Documents"),
             # str(Path.home() / "Desktop"),
-            # Add more paths as needed
         ],
-        max_workers=2,  # Reduce for testing
-        batch_size=50,
-        # You can customize excluded directories and file types
+        # Skip these directories entirely
         excluded_dirs={
             ".git",
             "__pycache__",
             "node_modules",
-            ".venv",
-            ".virtualenv",
-            ".tox",
-            ".pytest_cache",
-            ".mypy_cache",
-            "Library",
-            "System",
             ".Trash",
-            ".npm",
-            ".cache",
-            ".deepsearch_index",  # Don't index our own index
         },
+        # Skip these file extensions entirely
+        excluded_extensions={
+            ".tmp",
+            ".log",
+            ".cache",
+        },
+        # Only extract text from these extensions
+        supported_text_extensions={
+            ".txt",
+            ".md",
+            ".py",
+            ".js",
+            ".html",
+        },
+        # Only extract binary docs from these extensions
+        supported_document_extensions={
+            ".pdf",
+            ".docx",
+            ".pptx",
+        },
+        # Concurrency tuning
+        max_workers=2,  # lower for testing
+        batch_size=50,
+        max_file_size=100 * 1024 * 1024,  # 100 MB
+        use_process_pool=False,
     )
+
+    print("Starting DeepSearch File Indexer...")
+    print(f"  Index directory: {config.index_dir}")
+    print(f"  Monitoring paths: {config.monitored_paths}")
+    print(f"  Skipping extensions: {config.excluded_extensions}")
+    print(f"  Supported for text: {config.supported_text_extensions}")
+    print(f"  Supported for docs: {config.supported_document_extensions}")
+    print("Press Ctrl+C to stop\n")
 
     # Create indexer
     indexer = SmartFileIndexer(config)
 
-    print("Starting DeepSearch File Indexer...")
-    print(f"Monitoring paths: {config.monitored_paths}")
-    print("Press Ctrl+C to stop\n")
-
     try:
-        # Start the indexer (this will do initial bulk indexing)
+        # Start the indexer (does initial bulk index then watches)
         await indexer.start(perform_bulk_index=True)
     except KeyboardInterrupt:
         print("\nShutting down...")
         await indexer.stop()
 
-    print("Indexer stopped")
+    print("Indexer stopped\n")
 
 
 def search_example():
     """Example of searching the index"""
-    config = IndexingConfig()
-    indexer = SmartFileIndexer(config)
+    # Use Pydantic defaults at runtime, ignore the linter here
+    cfg = IndexingConfig()  # type: ignore[call]
+    idx = SmartFileIndexer(cfg)
 
-    # Example searches
     queries = ["python", "configuration", "README", "project"]
-
     print("Search Examples:")
     print("=" * 50)
 
-    for query in queries:
-        print(f"\nSearching for: '{query}'")
-        results = indexer.search(query, limit=5)
-
+    for q in queries:
+        print(f"\nSearching for: '{q}'")
+        results = idx.search(q, limit=5)
         if results:
-            for i, result in enumerate(results, 1):
-                print(f"  {i}. {result['filename']}")
-                print(f"     Path: {result['path']}")
-                print(f"     Score: {result['score']:.2f}")
+            for i, r in enumerate(results, 1):
+                print(f"  {i}. {r['filename']} (score {r['score']:.2f})")
+                print(f"     → {r['path']}")
         else:
             print("  No results found")
 
-    # Get index statistics
-    stats = indexer.get_stats()
-    print(f"\nIndex Statistics:")
-    print(f"  Total documents: {stats.get('total_documents', 0)}")
-    print(f"  Total size: {stats.get('total_size_gb', 0):.2f} GB")
-    print(f"  Files processed: {stats.get('files_processed', 0)}")
+    stats = idx.get_stats()
+    print("\nIndex Statistics:")
+    print(f"  Total documents:    {stats.get('total_documents', 0)}")
+    print(f"  Total size (GB):    {stats.get('total_size_gb', 0):.2f}")
+    print(f"  Files processed:    {stats.get('files_processed', 0)}")
 
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "search":
-        # Run search example
         search_example()
     else:
-        # Run the main indexer
         asyncio.run(main())

@@ -20,7 +20,8 @@ class WhooshIndexer:
     def __init__(self, config: IndexingConfig, logger: Optional[IndexingLogger] = None):
         self.config = config
         self.logger = logger or create_search_logger()
-        self.index_dir = Path(config.index_dir)
+        # Expand the ~ to the actual home directory
+        self.index_dir = Path(config.index_dir).expanduser()
         self.index_dir.mkdir(parents=True, exist_ok=True)
 
         # Define schema

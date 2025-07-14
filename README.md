@@ -165,65 +165,6 @@ config = IndexingConfig(
 - Microsoft Excel (`.xlsx`, `.xls`)
 - Microsoft PowerPoint (`.pptx`, `.ppt`)
 
-## Components Overview
-
-### SmartFileIndexer (Main Class)
-
-The central coordinator that manages all other components:
-
-- Handles async queue processing
-- Coordinates file system monitoring
-- Manages bulk indexing operations
-- Provides search interface
-- Uses specialized loggers for different operations
-
-### Enhanced Architecture Features
-
-- **Modular Design**: Clean separation of concerns across indexing, search, AI, and UI components
-- **Async Processing**: Efficient handling of large file collections
-- **Factory Pattern**: Standardized logger creation for consistent module-specific logging
-- **Optional Dependencies**: Components can accept optional logger instances for flexibility
-- **Thread Safety**: ThreadPoolExecutor used for text extraction to avoid serialization issues
-
-### IndexingLogger
-
-Enhanced logging system with module-specific organization:
-
-- **Module-Specific Directories**: Separate log directories for indexing, extraction, search, monitoring, performance, and errors
-- **Factory Functions**: Easy creation of specialized loggers with `create_indexing_logger()`, `create_extraction_logger()`, etc.
-- **Performance Tracking**: Dedicated performance logger for timing and metrics
-- **Error Segregation**: Automatic error log segregation across all modules
-- **Flexible Configuration**: Custom module loggers with `create_module_logger()`
-- **Organized Structure**: Logs stored in `~/.deepsearch_logs/` with subdirectories
-
-### TextExtractor
-
-Handles text extraction from various file formats:
-
-- PDF text extraction using PyPDF2
-- Word document processing with python-docx
-- Excel file processing with openpyxl
-- PowerPoint text extraction with python-pptx
-- Intelligent encoding detection for text files
-
-### WhooshIndexer
-
-Manages the Whoosh search index:
-
-- Creates and maintains search schema
-- Handles document addition, updating, and deletion
-- Provides search capabilities
-- Manages index optimization
-
-### FileSystemWatcher
-
-Real-time file system monitoring:
-
-- Uses watchdog for efficient file monitoring
-- Handles create, modify, delete, and move operations
-- Queues changes for processing
-- Supports recursive directory monitoring
-
 ## Running the Example
 
 The repository includes a complete example:
@@ -235,13 +176,6 @@ python example.py
 # Run search examples
 python example.py search
 ```
-
-## Performance Considerations
-
-- **Indexing Speed**: Typically processes 50-200 files per second depending on file sizes and types
-- **Memory Usage**: Configurable batch sizes help control memory consumption
-- **Storage**: The search index typically uses 5-10% of the original file sizes
-- **CPU Usage**: Configurable worker processes allow tuning for your system
 
 ## Logging and Monitoring
 
@@ -258,53 +192,6 @@ All logs are organized in `~/.deepsearch_logs/` with dedicated subdirectories:
 - **`performance/`**: Performance metrics and timing data
 - **`errors/`**: Centralized error logs from all modules
 - **`general/`**: General application logs
-
-### Logger Factory Functions
-
-```python
-from deepsearch.indexing.logger import (
-    create_indexing_logger,
-    create_extraction_logger,
-    create_search_logger,
-    create_monitoring_logger,
-    create_performance_logger,
-    create_module_logger
-)
-
-# Create specialized loggers
-indexing_logger = create_indexing_logger()
-extraction_logger = create_extraction_logger()
-
-# Create custom module logger
-custom_logger = create_module_logger("my_module", "my_logger")
-```
-
-### Logging Features
-
-- **Progress Tracking**: Real-time progress updates during bulk indexing
-- **Performance Metrics**: Files per second, MB per second processing rates
-- **Error Reporting**: Detailed error logs with automatic segregation
-- **Session Summaries**: Complete statistics after indexing operations
-- **Module Isolation**: Separate logs for different system components
-
-## Error Handling
-
-The system is designed to be robust:
-
-- Individual file processing errors don't stop the overall indexing
-- Graceful handling of permission errors and corrupted files
-- Automatic retry mechanisms for transient errors
-- Comprehensive error logging for debugging
-
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Permission Errors**: Make sure the indexer has read permissions for monitored directories
-2. **Large Files**: Adjust `max_file_size` in configuration if needed
-3. **Performance**: Tune `max_workers` and `batch_size` for your system
-4. **Disk Space**: Monitor index directory size, especially with large document collections
 
 ### Debug Mode
 
@@ -341,11 +228,3 @@ This will create sample logs in all module directories to verify the logging sys
 - Cloud synchronization capabilities
 - Additional file format support
 - Machine learning-based relevance scoring
-
-### Recently Implemented
-
-- ✅ **Module-specific logging system** with organized directory structure
-- ✅ **Factory pattern for logger creation** with specialized loggers
-- ✅ **Enhanced error handling** with centralized error logging
-- ✅ **Performance tracking** with dedicated performance metrics
-- ✅ **Flexible architecture** supporting optional logger dependencies

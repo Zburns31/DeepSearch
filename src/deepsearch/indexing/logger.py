@@ -57,8 +57,19 @@ class IndexingLogger:
             log_dir = module_dirs["general"]
 
         # Create formatters
-        detailed_formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - [%(module_name)s] - %(message)s"
+        # Create a custom formatter that includes module name
+        class ModuleFormatter(logging.Formatter):
+            def __init__(self, fmt, module_name):
+                super().__init__(fmt)
+                self.module_name = module_name
+
+            def format(self, record):
+                record.module_name = self.module_name
+                return super().format(record)
+
+        detailed_formatter = ModuleFormatter(
+            "%(asctime)s - %(name)s - %(levelname)s - [%(module_name)s] - %(message)s",
+            self.module_name,
         )
 
         simple_formatter = logging.Formatter(
@@ -82,19 +93,6 @@ class IndexingLogger:
         error_handler.setLevel(logging.ERROR)
         error_handler.setFormatter(detailed_formatter)
 
-        # Performance handler (if this is a performance-related logger)
-        if (
-            "performance" in self.module_name.lower()
-            or "stats" in self.module_name.lower()
-        ):
-            perf_log_file = (
-                module_dirs["performance"] / f"{self.module_name}_performance.log"
-            )
-            perf_handler = logging.FileHandler(perf_log_file)
-            perf_handler.setLevel(logging.INFO)
-            perf_handler.setFormatter(detailed_formatter)
-            self.logger.addHandler(perf_handler)
-
         # Add custom filter to include module_name in log records
         class ModuleFilter(logging.Filter):
             def __init__(self, module_name):
@@ -106,9 +104,26 @@ class IndexingLogger:
                 return True
 
         module_filter = ModuleFilter(self.module_name)
+
+        # Apply filter to all handlers that use detailed formatter
         file_handler.addFilter(module_filter)
         error_handler.addFilter(module_filter)
 
+        # Performance handler (if this is a performance-related logger)
+        if (
+            "performance" in self.module_name.lower()
+            or "stats" in self.module_name.lower()
+        ):
+            perf_log_file = (
+                module_dirs["performance"] / f"{self.module_name}_performance.log"
+            )
+            perf_handler = logging.FileHandler(perf_log_file)
+            perf_handler.setLevel(logging.INFO)
+            perf_handler.setFormatter(detailed_formatter)
+            perf_handler.addFilter(module_filter)  # Add filter here too
+            self.logger.addHandler(perf_handler)
+
+        # Add handlers to logger
         self.logger.addHandler(console_handler)
         self.logger.addHandler(file_handler)
         self.logger.addHandler(error_handler)
